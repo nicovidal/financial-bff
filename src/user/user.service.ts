@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -11,9 +11,9 @@ export class UserService {
 
 
   constructor(
-    
+
     @InjectModel(User.name) private readonly userModel: Model<User>
-  
+
   ) { }
 
 
@@ -26,17 +26,41 @@ export class UserService {
       return newUser;
     } catch (error) {
 
+      console.log('Error al crear usuario')
+      throw new BadRequestException(error)
+    }
+  }
+
+  async findAll() {
+
+    try {
+
+      const users = await this.userModel.find();
+
+      return users
+    } catch (error) {
+
+      console.log('error al obtener los usuarios')
+      throw new BadRequestException(error)
     }
 
-    return 'This action adds a new user';
+
   }
 
-  findAll() {
-    return `This action returns all user`;
-  }
+  async findOne(id: number) {
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+    try {
+
+      const user = await this.userModel.findOne({ _id: id })
+
+      return user;
+    } catch (error) {
+
+      console.log('error al obtener el usuario')
+      throw new BadRequestException(error)
+    }
+
+
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
@@ -46,4 +70,8 @@ export class UserService {
   remove(id: number) {
     return `This action removes a #${id} user`;
   }
+
+
+
+
 }
