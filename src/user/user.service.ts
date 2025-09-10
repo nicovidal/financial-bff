@@ -8,17 +8,12 @@ import { Model } from 'mongoose';
 @Injectable()
 export class UserService {
 
-
-
   constructor(
-
     @InjectModel(User.name) private readonly userModel: Model<User>
-
   ) { }
 
 
   async create(createUserDto: CreateUserDto) {
-
     try {
 
       const newUser = await this.userModel.create(createUserDto)
@@ -63,11 +58,33 @@ export class UserService {
 
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto) {
+
+    const user = await this.userModel.findOne({ _id: id })
+
+    try {
+
+      await user?.updateOne(updateUserDto, { new: true })
+
+      return { ...user?.toJSON(), ...updateUserDto }
+
+
+    } catch (error) {
+      console.log('error al actualizar el usuario')
+      throw new BadRequestException(error)
+    }
+
   }
 
-  remove(id: number) {
+  async remove(id: number) {
+
+    const { deletedCount } = await this.userModel.deleteOne({ _id: id })
+
+    if (deletedCount === 0) {
+      throw new BadRequestException('No se encontro el usuario')
+    }
+
+
     return `This action removes a #${id} user`;
   }
 
